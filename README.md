@@ -1,25 +1,12 @@
 # Imputation of multiple data sets
 
-Note: This document is written in markdown and is rendered at https://github.com/Chris1221/impute/wiki/General-Imputation-Procedure 
-
-## Author Affiliations
-
-- **Name:** Christopher B. Cole
-- **Email 1:** Chris dot c dot 1221 at gmail dot com
-- **Degrees**: None
-- **Affiliation 1:** Department of Biology, University of Ottawa, Ottawa, Canada
-- **Affiliation 2:** Statistical Genetics Group, Centre for Addiction and Mental Health, Toronto, Canada
-- **Affiliation 3:** Ruddy Canadian Cardiovascular Genetics Centre, University of Ottawa Heart Institute, Ottawa, Canada
-
-## Preface 
-
-The following document details the imputation procedure of four data sets. We will use the KIS3 as an example data set for all of the following examples. Note that this details the logical flow and I've wrapped all of these scripts into several wrappers. If you would like to know an easier way, please contact me. 
+The following document details the imputation procedure of four data sets. We will use the ex as an example data set for all of the following examples. Note that this details the logical flow and I've wrapped all of these scripts into several wrappers. If you would like to know an easier way, please contact me. 
 
 ## Reference Panel
 
 We choose an earlier release of 1000G due to known problems with current releases. Note that the reference data is found at 
 
-`/scratch/hpc2862/CAMH/jen/ALL.integrated_phase1_SHAPEIT_16-06-14.nomono`
+`/scratch/hpcXXXX/CAMH/ex_folder/ALL.integrated_phase1_SHAPEIT_16-06-14.nomono`
 
 The folder contains 
 
@@ -33,11 +20,11 @@ The folder contains
 
 To make the imputation more parallel, we will split up the original dataset into individual chromosomes. 
 
-First, navigate to the `impute` directory and switch to the **KIS3** branch:
+First, navigate to the `impute` directory and switch to the **ex** branch:
 
 ```bash
 $ cd /path/to/impute
-$ git checkout KIS3
+$ git checkout ex
 ```
 
 The code required for splitting the chromosomes is found in two files (master / slave)
@@ -64,7 +51,7 @@ However, we get errors complaining about duplicated SNPs. We want to eliminate d
 
 ```bash
 rm -f neam_alignment_chr*.log
-rm -f KIS3_AA_QC_complete_150731_chr*.*
+rm -f ex_AA_QC_complete_150731_chr*.*
 ```
 
 We now want to remove the duplicated sites, done with
@@ -141,19 +128,19 @@ Which is an R script which chunks each of the chromosomes into 5MB chunks (as re
 We save each of the process files in a separate folder, remove them from the original folder, and cat all of the genotypes together into separate chromosome files for easy parallelization. Ensure `grep` ReGeX uses regular ticks, not back ticks, double quotes for variable expansion
 
 ```bash
-cd /scratch/hpc2862/CAMH/jen/KIS3_AA/out
+cd /scratch/hpcXXXX/CAMH/ex_folder/ex_AA/out
 rsync -a --stat --progress2 * ../process/
 ls | grep 'info\|summary\|warnings\|diplotype' | xargs -d"\n" rm 
 
 mkdir ../final
 for CHR in $(seq 1 22)
 do
-    ls | grep "_chr${CHR}.flipped" | xargs -d"\n" cat > ../final/KIS3.imputed.chr${CHR}.gen
+    ls | grep "_chr${CHR}.flipped" | xargs -d"\n" cat > ../final/ex.imputed.chr${CHR}.gen
 done
 
-cp -R ../final ../KIS3_AA_imputed
+cp -R ../final ../ex_AA_imputed
 cp #sample files?
-gzip ../KIS3_AA_imputed #check this
+gzip ../ex_AA_imputed #check this
 ```
 
 This produces our final files. 
@@ -162,22 +149,22 @@ We move these to an output directory for easier management
 
 ```
 
-cd /scratch/hpc2862/CAMH/jen 
+cd /scratch/hpcXXXX/CAMH/ex_folder 
 
-mv KIS3_AA/plink/ KIS3_NEAM_PNAT_Imputation/plink/KIS3_AA/
-mv NEAM/plink/ KIS3_NEAM_PNAT_Imputation/plink/NEAM/
-mv PNAT2_AA/plink/ KIS3_NEAM_PNAT_Imputation/plink/PNAT2_AA/
-mv PNAT_EUR/plink/ KIS3_NEAM_PNAT_Imputation/plink/PNAT2_EUR/
+mv ex_AA/plink/ ex_NEAM_PNAT_Imputation/plink/ex_AA/
+mv NEAM/plink/ ex_NEAM_PNAT_Imputation/plink/NEAM/
+mv PNAT2_AA/plink/ ex_NEAM_PNAT_Imputation/plink/PNAT2_AA/
+mv PNAT_EUR/plink/ ex_NEAM_PNAT_Imputation/plink/PNAT2_EUR/
 
-mv KIS3_AA/out/ KIS3_NEAM_PNAT_Imputation/snptest/KIS3_AA/
-mv PNAT2_AA/out/ KIS3_NEAM_PNAT_Imputation/snptest/PNAT2_AA/
-mv PNAT_EUR/out/ KIS3_NEAM_PNAT_Imputation/snptest/PNAT2_EUR/
-mv NEAM/info/ KIS3_NEAM_PNAT_Imputation/snptest/NEAM/
+mv ex_AA/out/ ex_NEAM_PNAT_Imputation/snptest/ex_AA/
+mv PNAT2_AA/out/ ex_NEAM_PNAT_Imputation/snptest/PNAT2_AA/
+mv PNAT_EUR/out/ ex_NEAM_PNAT_Imputation/snptest/PNAT2_EUR/
+mv NEAM/info/ ex_NEAM_PNAT_Imputation/snptest/NEAM/
 
-mv KIS3_AA/process/ KIS3_NEAM_PNAT_Imputation/info/KIS3_AA/
-mv PNAT2_AA/process/ KIS3_NEAM_PNAT_Imputation/info/PNAT2_AA/
-mv PNAT_EUR/process/ KIS3_NEAM_PNAT_Imputation/info/PNAT2_EUR/
-mv NEAM/*_info KIS3_NEAM_PNAT_Imputation/info/NEAM/
+mv ex_AA/process/ ex_NEAM_PNAT_Imputation/info/ex_AA/
+mv PNAT2_AA/process/ ex_NEAM_PNAT_Imputation/info/PNAT2_AA/
+mv PNAT_EUR/process/ ex_NEAM_PNAT_Imputation/info/PNAT2_EUR/
+mv NEAM/*_info ex_NEAM_PNAT_Imputation/info/NEAM/
 ```
 
 ## Post-Imputation QC
