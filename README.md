@@ -1,5 +1,5 @@
-# Imputation of multiple data sets
-
+# General Imptuation Pipeline
+ 
 The following document details the imputation procedure of four data sets. We will use the ex as an example data set for all of the following examples. Note that this details the logical flow and I've wrapped all of these scripts into several wrappers. If you would like to know an easier way, please contact me. 
 
 ## Reference Panel
